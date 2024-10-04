@@ -12,9 +12,27 @@ builder.Services.AddSwaggerGen();
 //Adds SignalR to DI-container.
 builder.Services.AddSignalR();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", policy =>
+    {
+        policy
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithOrigins("http://localhost:5173")
+            .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -22,12 +40,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 //Defines URI of chat.
 app.MapHub<ChatHub>("/chat");
+
+app.UseCors("AllowSpecificOrigin");
 
 app.Run();

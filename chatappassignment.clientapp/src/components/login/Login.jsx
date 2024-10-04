@@ -16,6 +16,7 @@ const Login = () => {
           </div>
           <input type="password" id="login-password"></input>
           <div>
+            {/* Ersätt submit med function för att skicka till servern */}
             <button onClick="submit">Sign in</button>
           </div>
           <div className="register-container">
