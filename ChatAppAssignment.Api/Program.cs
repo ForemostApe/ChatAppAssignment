@@ -19,12 +19,8 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddUserSecrets<Program>();
 }
 
-var connectionString = builder.Configuration.GetConnectionString("DbConnection");
-
 builder.Services.AddDbContext<ChatContext>(options =>
-{
-    options.UseSqlite(builder.Configuration.GetConnectionString(connectionString));
-});
+    options.UseSqlite(builder.Configuration.GetConnectionString("DbConnection")));
 
 var app = builder.Build();
 
