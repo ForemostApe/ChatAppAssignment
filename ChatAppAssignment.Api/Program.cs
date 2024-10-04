@@ -1,4 +1,5 @@
 using ChatAppAssignment.Api.Contexts;
+using ChatAppAssignment.Api.Entities;
 using ChatAppAssignment.Api.Hubs;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ builder.Services.AddSwaggerGen();
 //Adds SignalR to DI-container.
 builder.Services.AddSignalR();
 
+//Implements use of UserSecrets to store connection-string etc.
 if (builder.Environment.IsDevelopment())
 {
     builder.Configuration.AddUserSecrets<Program>();
@@ -21,6 +23,15 @@ if (builder.Environment.IsDevelopment())
 
 builder.Services.AddDbContext<ChatContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DbConnection")));
+
+//Adds Identity as a service with options to setup requirements for account-registration and to create db based on ChatContext.
+builder.Services.AddDefaultIdentity<UserEntity>(x =>
+{
+    x.User.RequireUniqueEmail = true;
+    x.SignIn.RequireConfirmedEmail = false;
+    x.Password.RequiredLength = 8;
+
+}).AddEntityFrameworkStores<ChatContext>();
 
 var app = builder.Build();
 
