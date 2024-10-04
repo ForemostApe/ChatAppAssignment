@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatAppAssignment.Api", "ChatAppAssignment.Api\ChatAppAssignment.Api.csproj", "{7FFD43E8-8089-466A-A232-96FBEEB40009}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "chatappassignment.clientapp", "ChatAppAssignment.ClientApp\chatappassignment.clientapp.esproj", "{ACCFDEA6-2670-433A-93FA-6A06135BB4E5}"
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "ChatAppAssignment.Clientapp", "ChatAppAssignment.ClientApp\ChatAppAssignment.Clientapp.esproj", "{ACCFDEA6-2670-433A-93FA-6A06135BB4E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
