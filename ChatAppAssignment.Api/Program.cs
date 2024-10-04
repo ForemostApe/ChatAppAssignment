@@ -60,7 +60,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseCors();
+app.UseCors("AllowSpecificOrigin");
 
 //Defines URI of chat.
 app.MapHub<ChatHub>("/chat");

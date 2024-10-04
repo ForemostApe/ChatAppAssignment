@@ -1,25 +1,83 @@
+import { useState } from "react";
 import "./Register.css";
 
 const Register = () => {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Prevents the default form submission
+    CreateUser();
+  };
+
+  const CreateUser = () => {
+    const apiUrl = "https://localhost:7122/Auth/register";
+
+    const data = {
+      username,
+      email,
+      password,
+    };
+
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Response was not OK.");
+        }
+
+        if (
+          response.status === 204 ||
+          response.headers.get("Content-Length") === "0"
+        ) {
+          console.log("No content in response.");
+          return null; // No body to parse
+        }
+
+        return response.json();
+      })
+      .catch((error) => console.error("Error:", error));
+  };
   return (
     <div className="container">
       <h1>Register</h1>
       <div className="form-grid">
-        <form type="onSubmit">
+        <form onSubmit={handleSubmit}>
           <div>
             <label htmlFor="login-username">Username</label>
           </div>
-          <input id="login-username"></input>
+          <input
+            id="login-username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          ></input>
           <div>
             <label htmlFor="login-email">Email</label>
           </div>
-          <input id="login-email"></input>
+          <input
+            id="login-email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          ></input>
           <div>
             <label htmlFor="login-password">Password</label>
           </div>
-          <input type="password" id="login-password"></input>
+          <input
+            type="password"
+            id="login-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          ></input>
           <div>
-            <button onClick={CreateUser()}>Save</button>
+            <button type="Submit">Save</button>
           </div>
         </form>
       </div>
@@ -28,33 +86,3 @@ const Register = () => {
 };
 
 export default Register;
-
-const CreateUser = () => {
-  const username = "Per";
-  const email = "per.karlsson@yh.nackademin.se";
-  const password = "Abc123!!!";
-
-  const apiUrl = "https://localhost:7122/Auth/register";
-
-  const data = {
-    user: { username },
-    email: { email },
-    password: { password },
-  };
-
-  const requestOptions = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  };
-
-  fetch(apiUrl, requestOptions).then((response) => {
-    if (!response.ok) {
-      throw new Error("Response was not OK.");
-    }
-    console.log("Hey, it worked!");
-    return response.json();
-  });
-};
