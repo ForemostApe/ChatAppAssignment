@@ -33,6 +33,18 @@ builder.Services.AddDefaultIdentity<UserEntity>(x =>
 
 }).AddEntityFrameworkStores<ChatContext>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", policy =>
+    {
+        policy
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithOrigins("http://localhost:5173")
+            .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -47,6 +59,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors();
 
 //Defines URI of chat.
 app.MapHub<ChatHub>("/chat");
