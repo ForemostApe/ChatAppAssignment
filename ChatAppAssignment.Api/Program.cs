@@ -1,4 +1,6 @@
+using ChatAppAssignment.Api.Contexts;
 using ChatAppAssignment.Api.Hubs;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,18 @@ builder.Services.AddSwaggerGen();
 
 //Adds SignalR to DI-container.
 builder.Services.AddSignalR();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
+var connectionString = builder.Configuration.GetConnectionString("DbConnection");
+
+builder.Services.AddDbContext<ChatContext>(options =>
+{
+    options.UseSqlite(builder.Configuration.GetConnectionString(connectionString));
+});
 
 var app = builder.Build();
 
