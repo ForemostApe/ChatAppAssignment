@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ChatAppAssignment.Api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+//[Route("[controller]")]
 public class AuthController(SignInManager<UserEntity> signInManager, UserManager<UserEntity> userManager) : ControllerBase
 {
     private readonly SignInManager<UserEntity> _signInManager = signInManager;
