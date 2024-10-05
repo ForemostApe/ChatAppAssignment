@@ -1,19 +1,19 @@
 using ChatAppAssignment.Api.Contexts;
 using ChatAppAssignment.Api.Entities;
 using ChatAppAssignment.Api.Hubs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-//Adds SignalR to DI-container.
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(); //Adds SignalR to DI-container.
 
 //Implements use of UserSecrets to store connection-string etc.
 if (builder.Environment.IsDevelopment())
@@ -44,6 +44,25 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
+
+var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
+var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtIssuer,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+
 
 var app = builder.Build();
 
