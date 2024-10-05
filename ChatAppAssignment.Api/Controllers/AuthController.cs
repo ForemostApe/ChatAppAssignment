@@ -46,16 +46,16 @@ public class AuthController(SignInManager<UserEntity> signInManager, UserManager
 
     [HttpPost]
     [Route("/login")]
-    public async Task<IActionResult> LoginUser(UserModel userModel)
+    public async Task<IActionResult> LoginUser(LoginModel loginModel)
     {
         try
         {
             if (ModelState.IsValid)
             {
-                var userEntity = await _userManager.FindByNameAsync(userModel.Username);
+                var userEntity = await _userManager.FindByEmailAsync(loginModel.Email);
                 if (userEntity != null)
                 {
-                    var result = await _signInManager.PasswordSignInAsync(userModel.Username, userModel.Password, false, false);
+                    var result = await _signInManager.PasswordSignInAsync(userEntity.UserName, loginModel.Password, false, false);
                     if (result.Succeeded)
                     {
                     var token = _tokenFactory.GenerateJwtToken(userEntity);
