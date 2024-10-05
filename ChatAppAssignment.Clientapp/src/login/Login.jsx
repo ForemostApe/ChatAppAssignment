@@ -3,7 +3,7 @@ import "./Login.css";
 import { Link } from "react-router-dom";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = (e) => {
@@ -11,22 +11,49 @@ const Login = () => {
     LoginUser();
   };
 
-  function LoginUser() {
-    console.log("Fix this later!");
-  }
+  const LoginUser = () => {
+    const apiUrl = "https://localhost:7122/login";
 
+    const data = {
+      email,
+      password,
+    };
+
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+
+    fetch(apiUrl, requestOptions)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Response was not OK.");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data && data.token) {
+          localStorage.setItem("jwtToken", data.token);
+          window.location.href = "/chat";
+        } else console.log("No token returned.");
+      })
+      .catch((error) => console.error("Error:", error));
+  };
   return (
     <div className="container">
       <h1>Login</h1>
       <div className="form-grid">
         <form onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="login-username">Username</label>
+            <label htmlFor="login-username">Email</label>
           </div>
           <input
             id="login-username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           ></input>
           <div>
             <label htmlFor="login-password">Password</label>
@@ -51,5 +78,4 @@ const Login = () => {
     </div>
   );
 };
-
 export default Login;
