@@ -7,12 +7,12 @@ const Register = () => {
   const [password, setPassword] = useState("");
 
   const handleSubmit = (e) => {
-    e.preventDefault(); // Prevents the default form submission
+    e.preventDefault();
     CreateUser();
   };
 
   const CreateUser = () => {
-    const apiUrl = "https://localhost:7122/Auth/register";
+    const apiUrl = "https://localhost:7122/register";
 
     const data = {
       username,
@@ -33,16 +33,13 @@ const Register = () => {
         if (!response.ok) {
           throw new Error("Response was not OK.");
         }
-
-        if (
-          response.status === 204 ||
-          response.headers.get("Content-Length") === "0"
-        ) {
-          console.log("No content in response.");
-          return null; // No body to parse
-        }
-
         return response.json();
+      })
+      .then((data) => {
+        if (data && data.token) {
+          localStorage.setItem("jwtToken", data.token);
+          window.location.href = "/";
+        } else console.log("No token returned.");
       })
       .catch((error) => console.error("Error:", error));
   };

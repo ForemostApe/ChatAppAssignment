@@ -31,6 +31,7 @@
   color: #fff;
   height: 2rem;
   padding: 1rem;
+  gap: 0.5rem;
 }
 
 .form-grid button {

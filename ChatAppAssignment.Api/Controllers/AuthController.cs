@@ -33,14 +33,25 @@ public class AuthController(SignInManager<UserEntity> signInManager, UserManager
                     };
 
                     var result = await _userManager.CreateAsync(newUser, userModel.Password);
-                    if (result.Succeeded) return Ok();
+
+                    //Remove token-generation from registration-flow and separate registration and login-flows.
+                    if (result.Succeeded)
+                    {
+                        var token = _tokenFactory.GenerateJwtToken(newUser);
+                        return Ok(new { token });
+                    }
+                    else return BadRequest(result.Errors);
+                }
+                else
+                {
+                    return BadRequest("Username or email-address has already been registered.");
                 }
             }
-            return BadRequest();
+            return BadRequest("Invalid user-details.");
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return StatusCode(500, ex.Message);
         }
     }
 
