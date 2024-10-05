@@ -1,5 +1,6 @@
 using ChatAppAssignment.Api.Contexts;
 using ChatAppAssignment.Api.Entities;
+using ChatAppAssignment.Api.Factories;
 using ChatAppAssignment.Api.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -25,13 +26,18 @@ builder.Services.AddDbContext<ChatContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DbConnection")));
 
 //Adds Identity as a service with options to setup requirements for account-registration and to create db based on ChatContext.
-builder.Services.AddDefaultIdentity<UserEntity>(x =>
+builder.Services.AddDefaultIdentity<UserEntity>(options =>
 {
-    x.User.RequireUniqueEmail = true;
-    x.SignIn.RequireConfirmedEmail = false;
-    x.Password.RequiredLength = 8;
+    options.User.RequireUniqueEmail = true;
+    options.SignIn.RequireConfirmedEmail = false;
+    options.Password.RequiredLength = 8;
 
 }).AddEntityFrameworkStores<ChatContext>();
+
+
+//Gets the Jwt-key from Secrets and initializes the tokenfactory.
+var jwtKey = builder.Configuration["Jwt:Key"];
+builder.Services.AddSingleton<TokenFactory>(sp => new TokenFactory(jwtKey));
 
 builder.Services.AddCors(options =>
 {
@@ -46,7 +52,6 @@ builder.Services.AddCors(options =>
 });
 
 var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
-var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -62,7 +67,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
-
 
 var app = builder.Build();
 
