@@ -1,22 +1,23 @@
 ﻿using ChatAppAssignment.Api.Entities;
 using ChatAppAssignment.Api.Factories;
 using ChatAppAssignment.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ChatAppAssignment.Api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+//[Route("[controller]")]
 public class AuthController(SignInManager<UserEntity> signInManager, UserManager<UserEntity> userManager, TokenFactory tokenFactory) : ControllerBase
 {
     private readonly SignInManager<UserEntity> _signInManager = signInManager;
     private readonly UserManager<UserEntity> _userManager = userManager;
     private readonly TokenFactory _tokenFactory = tokenFactory;
 
-    [HttpPost]
-    [Route("/register")]
+    [HttpPost("/register")]
 
     public async Task<IActionResult> RegisterNewUser(UserModel userModel)
     {
@@ -53,8 +54,7 @@ public class AuthController(SignInManager<UserEntity> signInManager, UserManager
         }
     }
 
-    [HttpPost]
-    [Route("/login")]
+    [HttpPost("/login")]
     public async Task<IActionResult> LoginUser(LoginModel loginModel)
     {
         try
@@ -73,11 +73,21 @@ public class AuthController(SignInManager<UserEntity> signInManager, UserManager
                 }
                 return Unauthorized("Email or password invalid.");
             }
-            return BadRequest();
+            return BadRequest(ModelState);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return StatusCode(500, ex.Message);
         }
+    }
+
+    [Authorize]  
+    [HttpGet("/chat")]
+    public async Task<IActionResult> GetChatInfo()
+    {
+        var username = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+        var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        return Ok(new { username, userId });
     }
 }
