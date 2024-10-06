@@ -1,11 +1,97 @@
 .chat-container {
+  height: 50rem;
+  width: 30rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   background-color: #fff;
   border: 0.3rem solid #553c9a;
-  border-radius: 5%;
-  height: 60rem;
-  width: 50rem;
+  border-radius: 2rem;
+  padding: 2rem;
+}
+
+.logout {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: end;
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: red;
+}
+
+.chat-framework-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.chat-message-grid {
+  display: grid;
+  grid-template-columns: auto;
+  gap: 1rem;
+}
+
+.chat-message-outgoing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+
+.chat-message-incoming-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+}
+
+.chat-message-incoming,
+.chat-message-outgoing {
+  display: inline-block;
+  max-width: 20rem;
+  word-wrap: break-word;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.chat-message-user-container {
+  color: rgb(85, 85, 85);
+  font-size: 0.6rem;
+  margin: 0.2rem;
+}
+
+.chat-message-incoming {
+  background-color: #b393d3;
+  color: #000;
+}
+
+.chat-message-outgoing {
+  background-color: #553c9a;
+  color: #fff;
+}
+
+.messaging-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.messaging-container input {
+  width: 20rem;
+  padding: 0.4rem;
+  border-radius: 0.5rem;
+  border: 1px solid #b393d3;
+}
+
+.messaging-container button {
+  color: #fff;
+  border: 0px;
+  background-color: #553c9a;
+  width: 10rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.messaging-container button:hover {
+  background-color: #b393d3;
 }
