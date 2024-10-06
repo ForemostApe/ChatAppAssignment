@@ -16,6 +16,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR(); //Adds SignalR to DI-container.
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", policy =>
+    {
+        policy
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithOrigins("http://localhost:5173")
+            .AllowCredentials();
+    });
+});
+
 //Implements use of UserSecrets to store connection-string etc.
 if (builder.Environment.IsDevelopment())
 {
@@ -35,23 +47,10 @@ builder.Services.AddDefaultIdentity<UserEntity>(options =>
 }).AddEntityFrameworkStores<ChatContext>();
 
 
-//Gets the Jwt-key from Secrets and initializes the tokenfactory.
+//Gets the Jwt-key and issuer from Secrets and initializes the tokenfactory.
 var jwtKey = builder.Configuration["Jwt:Key"];
-builder.Services.AddSingleton<TokenFactory>(sp => new TokenFactory(jwtKey));
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowSpecificOrigin", policy =>
-    {
-        policy
-            .AllowAnyMethod()
-            .AllowAnyHeader()   
-            .WithOrigins("http://localhost:5173")
-            .AllowCredentials();
-    });
-});
-
-var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+builder.Services.AddSingleton<TokenFactory>(sp => new TokenFactory(jwtKey, jwtIssuer));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -59,14 +58,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
-            ValidAudience = jwtIssuer,
+            ValidAudience = "http://localhost:5173",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5208);
+    options.ListenAnyIP(7122, listenOptions =>
+    {
+        listenOptions.UseHttps();
+    });
+});
+
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -83,13 +93,13 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseCors("AllowSpecificOrigin");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseCors("AllowSpecificOrigin");
 
 //Defines URI of chat.
 app.MapHub<ChatHub>("/chat");

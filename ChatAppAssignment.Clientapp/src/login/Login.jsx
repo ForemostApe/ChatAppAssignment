@@ -1,10 +1,12 @@
 import { useState } from "react";
 import "./Login.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -30,21 +32,27 @@ const Login = () => {
     fetch(apiUrl, requestOptions)
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Response was not OK.");
+          throw new Error("Invalid email or password.");
         }
         return response.json();
       })
       .then((data) => {
         if (data && data.token) {
           localStorage.setItem("jwtToken", data.token);
-          window.location.href = "/chat";
-        } else console.log("No token returned.");
+          navigate("/chat");
+        } else {
+          setError("No token returned");
+        }
       })
-      .catch((error) => console.error("Error:", error));
+      .catch((error) => {
+        setError(error.message);
+        console.error("Error: ", error);
+      });
   };
   return (
     <div className="container">
       <h1>Login</h1>
+      {error && <div className="error-message">{error}</div>}{" "}
       <div className="form-grid">
         <form onSubmit={handleSubmit}>
           <div>

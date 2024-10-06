@@ -6,9 +6,10 @@ using System.Text;
 
 namespace ChatAppAssignment.Api.Factories;
 
-public class TokenFactory(string tokenKey)
+public class TokenFactory(string tokenKey, string issuer)
 {
     private readonly string _tokenKey = tokenKey;
+    private readonly string _issuer = issuer;
 
     public string GenerateJwtToken(UserEntity userEntity)
     {
@@ -19,10 +20,12 @@ public class TokenFactory(string tokenKey)
         {
             Subject = new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.Name, userEntity.UserName!),
-                new Claim(ClaimTypes.NameIdentifier, userEntity.Id)
-            }),
+            new Claim(ClaimTypes.Name, userEntity.UserName!),
+            new Claim(ClaimTypes.NameIdentifier, userEntity.Id)
+        }),
             Expires = DateTime.UtcNow.AddHours(2),
+            Audience = "http://localhost:5173",
+            Issuer = _issuer,
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
