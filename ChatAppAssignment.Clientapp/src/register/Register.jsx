@@ -35,14 +35,13 @@ const Register = () => {
         }
         return response.json();
       })
-      .then((data) => {
-        if (data && data.token) {
-          localStorage.setItem("jwtToken", data.token);
-          window.location.href = "/";
-        } else console.log("No token returned.");
+      .then(() => {
+        console.log("Registration successful!");
+        window.location.href = "/";
       })
       .catch((error) => console.error("Error:", error));
   };
+
   return (
     <div className="container">
       <h1>Register</h1>
