@@ -34,11 +34,9 @@ public class AuthController(SignInManager<UserEntity> signInManager, UserManager
 
                     var result = await _userManager.CreateAsync(newUser, userModel.Password);
 
-                    //Remove token-generation from registration-flow and separate registration and login-flows.
                     if (result.Succeeded)
                     {
-                        var token = _tokenFactory.GenerateJwtToken(newUser);
-                        return Ok(new { token });
+                        return Ok(new { message = "Registration successful" });
                     }
                     else return BadRequest(result.Errors);
                 }
