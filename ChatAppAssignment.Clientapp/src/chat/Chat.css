@@ -30,6 +30,8 @@
   display: grid;
   grid-template-columns: auto;
   gap: 1rem;
+  overflow-y: auto;
+  max-height: 40rem;
 }
 
 .chat-message-outgoing-container {
@@ -57,6 +59,8 @@
   color: rgb(85, 85, 85);
   font-size: 0.6rem;
   margin: 0.2rem;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .chat-message-incoming {
