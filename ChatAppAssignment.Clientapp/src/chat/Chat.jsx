@@ -135,10 +135,51 @@ const Chat = () => {
     }
   }
 
+  /* Kolla upp närmre ********************************************/
+
+  const handleLogout = async () => {
+    try {
+      // Optionally inform the server of the logout
+      await fetch("https://localhost:7122/logout", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (error) {
+      console.error("Failed to log out", error);
+    } finally {
+      // Remove the JWT token and any related state
+      localStorage.removeItem("jwtToken");
+      setUsername("");
+      setMessages([]);
+
+      // Stop the SignalR connection
+      if (connectionRef.current) {
+        connectionRef.current.stop();
+        connectionRef.current = null;
+      }
+
+      // Redirect to the login page or home page
+      navigate("/");
+    }
+  };
+
   return (
     <div className="chat-container">
       {error && <div className="error-message">{error}</div>}
-      <div className="logout">⨯</div>
+      <div className="logout">
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            handleLogout();
+          }}
+        >
+          ⨯
+        </a>
+      </div>
       <div className="chat-framework-container">
         <div className="chat-message-grid">
           {Array.isArray(messages) &&
