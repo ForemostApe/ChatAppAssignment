@@ -5,16 +5,17 @@ import { useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
 
 const Chat = () => {
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState("");
-  const [username, setUsername] = useState("");
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState(""); // Single message to send
+  const [messages, setMessages] = useState([]); // Array of all messages
+  const [username, setUsername] = useState(""); // Current user's username
+  const [userId, setUserId] = useState("");
+  const [error, setError] = useState(null); // Error handling
+  const [loading, setLoading] = useState(true); // Loading state
   const navigate = useNavigate();
-  const connectionRef = useRef(null);
+  const connectionRef = useRef(null); // SignalR connection reference
 
   useEffect(() => {
-    //Authentication from Jwt-token
+    // Authentication with JWT-token
     const fetchChatData = async () => {
       const token = localStorage.getItem("jwtToken");
 
@@ -25,7 +26,6 @@ const Chat = () => {
         return;
       }
 
-      //Calls endpoint which and checks authorization.
       try {
         const response = await fetch("https://localhost:7122/chat", {
           method: "GET",
@@ -40,13 +40,14 @@ const Chat = () => {
         }
 
         const data = await response.json();
-        setUsername(data.Username);
+        setUsername(data.username);
+        setUserId(data.userId);
 
-        //Open websocket-connection using signalR.
+        // Open websocket connection using SignalR
         if (!connectionRef.current) {
           const conn = new signalR.HubConnectionBuilder()
             .withUrl("https://localhost:7122/chat", {
-              accessTokenFactory: () => localStorage.getItem("jwtToken "),
+              accessTokenFactory: () => localStorage.getItem("jwtToken"),
             })
             .build();
 
@@ -57,9 +58,30 @@ const Chat = () => {
             .then(() => {
               console.log("Connected to the hub.");
             })
-            .catch(function (error) {
+            .catch((error) => {
               setError(`Failed to start the connection: ${error.message}`);
             });
+
+          // Listen for incoming messages
+          connectionRef.current.on(
+            "ReceiveMessage",
+            (username, userId, timestamp, message) => {
+              const sanitizedMessage = DOMPurify.sanitize(message, {
+                ALLOWED_TAGS: ["b", "i"],
+              });
+
+              // Append the new message to the messages array
+              setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                  username,
+                  userId,
+                  timestamp,
+                  message: sanitizedMessage,
+                },
+              ]);
+            }
+          );
         }
       } catch (error) {
         setError(`Failed to start the connection: ${error.message}`);
@@ -67,16 +89,6 @@ const Chat = () => {
       } finally {
         setLoading(false);
       }
-
-      connectionRef.current.on("ReceiveMessage", (user, message) => {
-        const sanitizedMessage = DOMPurify.sanitize(message, {
-          ALLOWED_TAGS: ["b", "i"],
-        });
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { user, message: sanitizedMessage },
-        ]);
-      });
     };
 
     fetchChatData();
@@ -89,6 +101,8 @@ const Chat = () => {
     };
   }, [navigate]);
 
+  console.log(messages);
+
   if (loading) {
     return <div className="container">Loading...</div>;
   }
@@ -100,17 +114,20 @@ const Chat = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await sendMessage();
-    setMessage("");
+    setMessage(""); // Clear the input after sending the message
   };
 
+  // Send the message to the server via SignalR
   async function sendMessage() {
     try {
       const sanitizedMessage = DOMPurify.sanitize(message, {
         ALLOWED_TAGS: ["b", "i"],
       });
+
       await connectionRef.current.invoke(
         "SendMessage",
         username,
+        userId,
         sanitizedMessage
       );
     } catch (error) {
@@ -126,34 +143,31 @@ const Chat = () => {
         <div className="chat-message-grid">
           {Array.isArray(messages) &&
             messages.map((msg, index) => (
-              <div key={index} className="chat-message-incoming-container">
-                <div className="chat-message-incoming">
+              <div
+                key={index}
+                className={
+                  msg.userId === userId
+                    ? "chat-message-outgoing-container"
+                    : "chat-message-incoming-container"
+                }
+              >
+                <div
+                  className={
+                    msg.userId === userId
+                      ? "chat-message-outgoing"
+                      : "chat-message-incoming"
+                  }
+                >
                   <span>{msg.message}</span>
-                  <div className="chat-message-user-container">
-                    <span className="username">{msg.username}</span>
-                    <span className="message-timestamp">{msg.timestamp}</span>
-                  </div>
+                </div>
+                <div className="chat-message-user-container">
+                  <span className="username">{msg.username}</span>
+                  <span className="message-timestamp">
+                    {new Date(msg.timestamp).toLocaleString()}
+                  </span>
                 </div>
               </div>
             ))}
-          {/* 
-          <div className="chat-message-incoming-container">
-            <div className="chat-message-incoming">
-              Hallå
-              <br />
-              Hall igenhfjdgsjhgfdhjgfdhjg gfhdjsgfhjsd hfgdshjf gsdhjfgdshjfg
-              ghjfdsgfhjd
-            </div>
-            <div className="chat-message-user-container">
-              Der Strumpf 2023-04-12 12:03
-            </div>
-          </div>
-          <div className="chat-message-outgoing-container">
-            <div className="chat-message-outgoing">Hallå själv</div>
-            <div className="chat-message-user-container">
-              Gargamel 2023-04-12 12:03
-            </div>
-           */}
         </div>
         <div>
           <form onSubmit={handleSubmit}>
@@ -161,7 +175,7 @@ const Chat = () => {
               <input
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-              ></input>
+              />
               <button type="submit">Send</button>
             </div>
           </form>
