@@ -9,16 +9,6 @@
   padding: 2rem;
 }
 
-.logout {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: end;
-  font-weight: 900;
-  font-size: 2rem;
-  color: red;
-}
-
 .chat-framework-container {
   display: flex;
   flex-direction: column;
@@ -98,4 +88,19 @@
 
 .messaging-container button:hover {
   background-color: #b393d3;
+}
+
+.logout {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: end;
+}
+
+.logout a {
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 2rem;
+  cursor: pointer;
+  color: red;
 }
