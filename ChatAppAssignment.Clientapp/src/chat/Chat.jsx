@@ -2,9 +2,11 @@ import "./Chat.css";
 import * as signalR from "@microsoft/signalr";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import DOMPurify from "dompurify";
 
 const Chat = () => {
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,6 +25,7 @@ const Chat = () => {
         return;
       }
 
+      //Calls endpoint which and checks authorization.
       try {
         const response = await fetch("https://localhost:7122/chat", {
           method: "GET",
@@ -64,6 +67,16 @@ const Chat = () => {
       } finally {
         setLoading(false);
       }
+
+      connectionRef.current.on("ReceiveMessage", (user, message) => {
+        const sanitizedMessage = DOMPurify.sanitize(message, {
+          ALLOWED_TAGS: ["b", "i"],
+        });
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { user, message: sanitizedMessage },
+        ]);
+      });
     };
 
     fetchChatData();
@@ -92,7 +105,14 @@ const Chat = () => {
 
   async function sendMessage() {
     try {
-      await connectionRef.current.invoke("SendMessage", username, message);
+      const sanitizedMessage = DOMPurify.sanitize(message, {
+        ALLOWED_TAGS: ["b", "i"],
+      });
+      await connectionRef.current.invoke(
+        "SendMessage",
+        username,
+        sanitizedMessage
+      );
     } catch (error) {
       console.error(error.toString());
     }
@@ -104,6 +124,19 @@ const Chat = () => {
       <div className="logout">⨯</div>
       <div className="chat-framework-container">
         <div className="chat-message-grid">
+          {Array.isArray(messages) &&
+            messages.map((msg, index) => (
+              <div key={index} className="chat-message-incoming-container">
+                <div className="chat-message-incoming">
+                  <span>{msg.message}</span>
+                  <div className="chat-message-user-container">
+                    <span className="username">{msg.username}</span>
+                    <span className="message-timestamp">{msg.timestamp}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          {/* 
           <div className="chat-message-incoming-container">
             <div className="chat-message-incoming">
               Hallå
@@ -120,18 +153,7 @@ const Chat = () => {
             <div className="chat-message-user-container">
               Gargamel 2023-04-12 12:03
             </div>
-          </div>
-          <div className="chat-message-incoming-container">
-            <div className="chat-message-incoming">
-              Hallå
-              <br />
-              Hall igenhfjdgsjhgfdhjgfdhjg gfhdjsgfhjsd hfgdshjf gsdhjfgdshjfg
-              ghjfdsgfhjd
-            </div>
-            <div className="chat-message-user-container">
-              Der Strumpf 2023-04-12 12:03
-            </div>
-          </div>
+           */}
         </div>
         <div>
           <form onSubmit={handleSubmit}>
@@ -148,4 +170,5 @@ const Chat = () => {
     </div>
   );
 };
+
 export default Chat;

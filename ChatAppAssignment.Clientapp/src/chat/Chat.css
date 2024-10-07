@@ -30,6 +30,8 @@
   display: grid;
   grid-template-columns: auto;
   gap: 1rem;
+  overflow-y: auto;
+  max-height: 40rem;
 }
 
 .chat-message-outgoing-container {
