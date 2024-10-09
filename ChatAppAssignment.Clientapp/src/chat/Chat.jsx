@@ -5,14 +5,14 @@ import { useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
 
 const Chat = () => {
-  const [message, setMessage] = useState(""); // Single message to send
-  const [messages, setMessages] = useState([]); // Array of all messages
-  const [username, setUsername] = useState(""); // Current user's username
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
-  const [error, setError] = useState(null); // Error handling
-  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const connectionRef = useRef(null); // SignalR connection reference
+  const connectionRef = useRef(null);
 
   useEffect(() => {
     // Authentication with JWT-token
@@ -101,8 +101,6 @@ const Chat = () => {
     };
   }, [navigate]);
 
-  console.log(messages);
-
   if (loading) {
     return <div className="container">Loading...</div>;
   }
@@ -114,7 +112,7 @@ const Chat = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await sendMessage();
-    setMessage(""); // Clear the input after sending the message
+    setMessage("");
   };
 
   // Send the message to the server via SignalR
