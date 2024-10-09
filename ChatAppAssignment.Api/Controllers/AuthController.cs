@@ -10,7 +10,6 @@ using System.Security.Claims;
 namespace ChatAppAssignment.Api.Controllers;
 
 [ApiController]
-//[Route("[controller]")]
 public class AuthController(SignInManager<UserEntity> signInManager, UserManager<UserEntity> userManager, TokenFactory tokenFactory) : ControllerBase
 {
     private readonly SignInManager<UserEntity> _signInManager = signInManager;
@@ -83,7 +82,7 @@ public class AuthController(SignInManager<UserEntity> signInManager, UserManager
 
     [Authorize]  
     [HttpGet("/chat")]
-    public async Task<IActionResult> GetChatInfo()
+    public IActionResult GetUserInfo()
     {
         var username = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
         var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;

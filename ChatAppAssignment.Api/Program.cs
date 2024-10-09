@@ -4,11 +4,10 @@ using ChatAppAssignment.Api.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSignalR(); //Adds SignalR to DI-container.
+builder.Services.AddSignalR(); 
 builder.Services.AddCorsPolicy();
 builder.Services.ConfigureDbContext(builder.Configuration);
 builder.Services.ConfigureIdentity();
@@ -20,6 +19,7 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddUserSecrets<Program>();
 }
 
+//Set Kestrel-webserver to listen to incoming traffic and redirect http to https.
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5208);
