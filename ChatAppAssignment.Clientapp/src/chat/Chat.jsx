@@ -133,11 +133,9 @@ const Chat = () => {
     }
   }
 
-  /* Kolla upp närmre ********************************************/
-
+  //Inform server of logout, remove JWT-token and stop connection.
   const handleLogout = async () => {
     try {
-      // Optionally inform the server of the logout
       await fetch("https://localhost:7122/logout", {
         method: "POST",
         headers: {
@@ -148,18 +146,14 @@ const Chat = () => {
     } catch (error) {
       console.error("Failed to log out", error);
     } finally {
-      // Remove the JWT token and any related state
       localStorage.removeItem("jwtToken");
       setUsername("");
       setMessages([]);
 
-      // Stop the SignalR connection
       if (connectionRef.current) {
         connectionRef.current.stop();
         connectionRef.current = null;
       }
-
-      // Redirect to the login page or home page
       navigate("/");
     }
   };
