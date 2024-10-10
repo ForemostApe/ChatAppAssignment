@@ -99,7 +99,7 @@ const Chat = () => {
         connectionRef.current = null;
       }
     };
-  }, [navigate]);
+  }, [navigate]); // TODO: behövs denna? tom dep arr = när komp börjar leva
 
   if (loading) {
     return <div className="container">Loading...</div>;
@@ -115,12 +115,12 @@ const Chat = () => {
     setMessage("");
   };
 
-  // Send the message to the server via SignalR
+  // Sanitizes message and send to the server via SignalR
+  // Disallows all HTML-tags.
+
   async function sendMessage() {
     try {
-      const sanitizedMessage = DOMPurify.sanitize(message, {
-        ALLOWED_TAGS: ["b", "i"],
-      });
+      const sanitizedMessage = DOMPurify.sanitize(message);
 
       await connectionRef.current.invoke(
         "SendMessage",

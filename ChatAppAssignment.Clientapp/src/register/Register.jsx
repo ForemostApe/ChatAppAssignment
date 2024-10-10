@@ -1,17 +1,19 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Register.css";
 
 const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    CreateUser();
+    createUser();
   };
 
-  const CreateUser = () => {
+  const createUser = () => {
     const apiUrl = "https://localhost:7122/register";
 
     const data = {
@@ -37,7 +39,7 @@ const Register = () => {
       })
       .then(() => {
         console.log("Registration successful!");
-        window.location.href = "/";
+        navigate("/");
       })
       .catch((error) => console.error("Error:", error));
   };
